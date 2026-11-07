@@ -1,6 +1,6 @@
 <!-- Repo name must be exactly: priyankamahatokewat -->
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0a192f,55:0b3a3a,100:064e2b&height=200&section=header&text=Priyanka%20Mahato&fontSize=52&fontColor=00ff41&animation=fadeIn&fontAlignY=38&desc=Full%20Stack%20Web%20Developer%20%7C%20Frontend%20Developer&descSize=18&descColor=c9d1d9&descAlignY=60" width="100%" alt="Priyanka Mahato banner"/>
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0a192f,55:0b3a3a,100:064e2b&height=200&section=header&text=Priyanka%20Mahato&fontSize=52&fontColor=00ff41&animation=fadeIn&fontAlignY=38&desc=Software%20Developer%20%7C%20Full%20Stack%20Web%20Developer%20%7C%20Frontend%20Developer&descSize=18&descColor=c9d1d9&descAlignY=60" width="100%" alt="Priyanka Mahato banner"/>
 
 <div align="center">
 
@@ -20,8 +20,8 @@
 
 ---
 
-### 💻 About Me
-## 🛠️ About Me
+  
+## 🛠️ About Me 💻
 
 - 👩‍💻 Hi! I am **Priyanka Kumari**.
 - 🌱 I am passionate about programming and technology.
@@ -169,48 +169,4 @@ Outside coursework I build side projects, practice UI design in Figma, and I'm l
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0a192f,55:0b3a3a,100:064e2b&height=100&section=footer" width="100%" alt="Footer"/>
 
-<!--
-=====================================================================
-SNAKE WORKFLOW (hidden on your profile, only visible in edit mode)
 
-GitHub needs this code in its own file to run the snake:
-  File name:  .github/workflows/snake.yml
-Copy everything between the START and END lines into that file.
-=====================================================================
-
------ START (copy from the next line) -----
-name: Generate Snake Animation
-
-on:
-  schedule:
-    - cron: "0 */12 * * *"
-  workflow_dispatch:
-  push:
-    branches:
-      - main
-
-permissions:
-  contents: write
-
-jobs:
-  generate:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Generate snake SVGs
-        uses: Platane/snk/svg-only@v3
-        with:
-          github_user_name: ${{ github.repository_owner }}
-          outputs: |
-            dist/github-contribution-grid-snake.svg
-            dist/github-contribution-grid-snake-dark.svg?palette=github-dark
-
-      - name: Push snake to the output branch
-        uses: crazy-max/ghaction-github-pages@v3.1.0
-        with:
-          target_branch: output
-          build_dir: dist
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
------ END (copy up to the previous line) -----
--->
