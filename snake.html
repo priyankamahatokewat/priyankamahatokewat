@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Snake Game | Priyanka Mahato</title>
+<style>
+  :root { --bg:#000; --fg:#00ff41; --dim:#0a3d14; --text:#c9d1d9; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; height:100%; background:var(--bg); color:var(--fg); font-family:"Courier New", monospace; }
+  body { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:12px; touch-action:none; }
+  h1 { margin:0; font-size:1.2rem; letter-spacing:2px; text-shadow:0 0 8px var(--fg); }
+  .bar { display:flex; gap:24px; font-size:.95rem; }
+  canvas { width:min(92vw, 420px); aspect-ratio:1; background:#020a03; border:2px solid var(--fg); box-shadow:0 0 18px rgba(0,255,65,.45); }
+  .hint { color:var(--text); font-size:.8rem; text-align:center; opacity:.8; }
+  .pad { display:grid; grid-template-columns:repeat(3,56px); grid-template-rows:repeat(2,56px); gap:6px; }
+  .pad button { background:#050f06; color:var(--fg); border:1px solid var(--fg); font-size:1.4rem; border-radius:6px; }
+  .pad button:active { background:var(--dim); }
+  .up { grid-column:2; } .left { grid-column:1; grid-row:2; } .down { grid-column:2; grid-row:2; } .right { grid-column:3; grid-row:2; }
+  .back { color:var(--fg); font-size:.8rem; }
+  @media (hover:hover) and (pointer:fine) { .pad { display:none; } }
+</style>
+</head>
+<body>
+  <h1>&gt; SNAKE.EXE</h1>
+  <div class="bar"><span>SCORE: <b id="score">0</b></span><span>BEST: <b id="best">0</b></span></div>
+  <canvas id="game" width="400" height="400"></canvas>
+  <div class="hint">Arrow keys / WASD to move &middot; SPACE to start, pause or restart</div>
+  <div class="pad">
+    <button class="up" data-d="U">&#9650;</button>
+    <button class="left" data-d="L">&#9664;</button>
+    <button class="down" data-d="D">&#9660;</button>
+    <button class="right" data-d="R">&#9654;</button>
+  </div>
+  <a class="back" href="https://github.com/priyankamahatokewat">&lt; back to GitHub profile</a>
+
+<script>
+(function () {
+  var cv = document.getElementById("game"), ctx = cv.getContext("2d");
+  var N = 20, S = cv.width / N;
+  var scoreEl = document.getElementById("score"), bestEl = document.getElementById("best");
+  var best = 0;
+  try { best = parseInt(localStorage.getItem("snakeBest") || "0", 10) || 0; } catch (e) {}
+  bestEl.textContent = best;
+
+  var snake, dir, next, food, score, timer, state = "ready"; // ready | running | paused | over
+  var DIRS = { U:[0,-1], D:[0,1], L:[-1,0], R:[1,0] };
+
+  function reset() {
+    snake = [{x:10,y:10},{x:9,y:10},{x:8,y:10}];
+    dir = "R"; next = "R"; score = 0; scoreEl.textContent = 0;
+    placeFood(); draw();
+  }
+  function placeFood() {
+    do { food = { x: Math.floor(Math.random()*N), y: Math.floor(Math.random()*N) }; }
+    while (snake.some(function (s) { return s.x === food.x && s.y === food.y; }));
+  }
+  function speed() { return Math.max(60, 140 - score * 4); }
+  function loop() {
+    step();
+    if (state === "running") timer = setTimeout(loop, speed());
+  }
+  function step() {
+    dir = next;
+    var d = DIRS[dir], head = { x: snake[0].x + d[0], y: snake[0].y + d[1] };
+    var hitWall = head.x < 0 || head.y < 0 || head.x >= N || head.y >= N;
+    var hitSelf = snake.some(function (s) { return s.x === head.x && s.y === head.y; });
+    if (hitWall || hitSelf) { state = "over"; if (score > best) { best = score; bestEl.textContent = best; try { localStorage.setItem("snakeBest", best); } catch (e) {} } draw(); return; }
+    snake.unshift(head);
+    if (head.x === food.x && head.y === food.y) { score++; scoreEl.textContent = score; placeFood(); }
+    else snake.pop();
+    draw();
+  }
+  function setDir(d) {
+    var opp = { U:"D", D:"U", L:"R", R:"L" };
+    if (opp[d] !== dir) next = d;
+  }
+  function toggle() {
+    if (state === "running") { state = "paused"; clearTimeout(timer); draw(); }
+    else { if (state === "over" || state === "ready") reset(); state = "running"; loop(); }
+  }
+  function text(msg, sub) {
+    ctx.fillStyle = "rgba(0,0,0,.72)"; ctx.fillRect(0, 0, cv.width, cv.height);
+    ctx.fillStyle = "#00ff41"; ctx.textAlign = "center";
+    ctx.font = "bold 28px Courier New"; ctx.fillText(msg, cv.width/2, cv.height/2 - 8);
+    ctx.font = "14px Courier New"; ctx.fillText(sub, cv.width/2, cv.height/2 + 20);
+  }
+  function draw() {
+    ctx.fillStyle = "#020a03"; ctx.fillRect(0, 0, cv.width, cv.height);
+    ctx.strokeStyle = "rgba(0,255,65,.06)";
+    for (var i = 0; i <= N; i++) {
+      ctx.beginPath(); ctx.moveTo(i*S,0); ctx.lineTo(i*S,cv.height); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0,i*S); ctx.lineTo(cv.width,i*S); ctx.stroke();
+    }
+    ctx.fillStyle = "#00e5ff"; ctx.shadowColor = "#00e5ff"; ctx.shadowBlur = 10;
+    ctx.fillRect(food.x*S+3, food.y*S+3, S-6, S-6);
+    ctx.shadowColor = "#00ff41";
+    snake.forEach(function (s, i) {
+      ctx.fillStyle = i === 0 ? "#b6ffc9" : "#00ff41";
+      ctx.fillRect(s.x*S+1, s.y*S+1, S-2, S-2);
+    });
+    ctx.shadowBlur = 0;
+    if (state === "ready") text("PRESS SPACE", "or tap the screen to start");
+    if (state === "paused") text("PAUSED", "press SPACE to continue");
+    if (state === "over") text("GAME OVER", "score " + score + " - press SPACE to retry");
+  }
+
+  document.addEventListener("keydown", function (e) {
+    var k = e.key.toLowerCase();
+    var map = { arrowup:"U", w:"U", arrowdown:"D", s:"D", arrowleft:"L", a:"L", arrowright:"R", d:"R" };
+    if (map[k]) { e.preventDefault(); setDir(map[k]); if (state === "ready") toggle(); }
+    else if (k === " ") { e.preventDefault(); toggle(); }
+  });
+  Array.prototype.forEach.call(document.querySelectorAll(".pad button"), function (b) {
+    b.addEventListener("click", function () { setDir(b.dataset.d); if (state !== "running") toggle(); });
+  });
+  cv.addEventListener("click", function () { if (state !== "running") toggle(); });
+
+  var sx, sy;
+  cv.addEventListener("touchstart", function (e) { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
+  cv.addEventListener("touchend", function (e) {
+    var dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+    if (Math.abs(dx) < 20 && Math.abs(dy) < 20) return;
+    setDir(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "R" : "L") : (dy > 0 ? "D" : "U"));
+    if (state !== "running") toggle();
+  }, { passive: true });
+
+  reset();
+})();
+</script>
+</body>
+</html>
